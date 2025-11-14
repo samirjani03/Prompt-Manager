@@ -27,22 +27,12 @@
             --hover-color: #e9ecef;
         }
 
-        /* [data-theme="dark"] {
-            --bg-color: #2b2727;
+        [data-theme="dark"] {
+            --bg-color: #121212;
             --text-color: #e0e0e0;
             --card-bg: #1e1e1e;
             --header-bg: linear-gradient(135deg, #2d3748, #4a5568);
             --sidebar-bg: #1e1e1e;
-            --input-bg: #2d3748;
-            --border-color: #2d3748;
-            --hover-color: #2d3748;
-        } */
-        [data-theme="dark"] {
-            --bg-color: #111827;
-            --text-color: #e0e0e0;
-            --card-bg: #2D3748;
-            --header-bg: linear-gradient(135deg, #475d84, #0447bc);
-            --sidebar-bg: #2D3748;
             --input-bg: #2d3748;
             --border-color: #2d3748;
             --hover-color: #2d3748;
@@ -227,6 +217,10 @@
             color: var(--danger-color);
         }
 
+        .edit-category-btn:hover {
+            color: var(--success-color);
+        }
+
         .add-category {
             margin-top: 1.5rem;
         }
@@ -373,7 +367,7 @@
         }
 
         .copy-btn {
-            background-color: rgba(1, 127, 244, 0.874);
+            background-color: var(--success-color);
             color: white;
             border: none;
             padding: 0.4rem 0.8rem;
@@ -381,9 +375,6 @@
             cursor: pointer;
             font-size: 0.8rem;
             transition: var(--transition);
-            display: flex;
-            align-items: center;
-            gap: 0.3rem;
         }
 
         .copy-btn:hover {
@@ -612,30 +603,6 @@
     </style>
 </head>
 <body>
-    <script>
-    // Check if user came from login page (basic protection)
-    // In a real app, you'd use proper authentication
-    if (!sessionStorage.getItem('authenticated')) {
-        window.location.href = 'index.html';
-    }
-
-    // Handle page reload confirmation
-    window.addEventListener('beforeunload', (e) => {
-        e.preventDefault();
-        e.returnValue = '';
-        return '';
-    });
-
-    // Listen for page reload and redirect to login
-    window.addEventListener('load', () => {
-        // Check if page is being reloaded
-        if (performance.navigation.type === 1) {
-            // Clear authentication and redirect to login
-            sessionStorage.removeItem('authenticated');
-            window.location.href = 'index.html';
-        }
-    });
-</script>
     <header>
         <div class="container">
             <div class="header-content">
@@ -748,6 +715,27 @@
         </div>
     </div>
 
+    <!-- Edit Category Modal -->
+    <div class="modal" id="editCategoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Edit Category</h3>
+                <button class="close-btn" id="closeEditCategoryModalBtn">&times;</button>
+            </div>
+            <form id="editCategoryForm">
+                <input type="hidden" id="editCategoryId">
+                <div class="form-group">
+                    <label for="editCategoryName">Category Name</label>
+                    <input type="text" id="editCategoryName" required>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelEditCategoryBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Category</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Export Data Modal -->
     <div class="modal" id="exportModal">
         <div class="modal-content">
@@ -802,11 +790,37 @@
     <div class="notification" id="notification">Prompt copied to clipboard!</div>
 
     <script>
+        // Require prior login (basic protection)
+        if (!sessionStorage.getItem('authenticated')) {
+            window.location.href = 'index.html';
+        }
+
+        // Show browser "Leave site?" confirmation on reload/close
+        window.addEventListener('beforeunload', (e) => {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
+        });
+
+        // Detect reload (Navigation Timing Level 2 if available) and redirect to login
+        window.addEventListener('load', () => {
+            const navEntries = performance.getEntriesByType ? performance.getEntriesByType('navigation') : null;
+            const isReload = (navEntries && navEntries[0] && navEntries[0].type === 'reload')
+                             || (performance.navigation && performance.navigation.type === 1);
+
+            if (isReload) {
+                // Clear authentication and redirect to login page
+                sessionStorage.removeItem('authenticated');
+                window.location.href = 'index.html';
+            }
+        });
+
         // Sample data structure
         let categories = JSON.parse(localStorage.getItem('promptCategories')) || [
             { id: 1, name: 'Study Prompts', count: 2 },
             { id: 2, name: 'Business Prompts', count: 1 },
-            { id: 3, name: 'Creative Writing', count: 1 }
+            { id: 3, name: 'Creative Writing', count: 1 },
+            { id: 4, name: 'demo', count: 1 }
         ];
 
         let prompts = JSON.parse(localStorage.getItem('prompts')) || [
@@ -860,6 +874,12 @@
         const cancelDeleteCategoryBtn = document.getElementById('cancelDeleteCategoryBtn');
         const confirmDeleteCategoryBtn = document.getElementById('confirmDeleteCategoryBtn');
         const deleteCategoryMessage = document.getElementById('deleteCategoryMessage');
+        const editCategoryModal = document.getElementById('editCategoryModal');
+        const closeEditCategoryModalBtn = document.getElementById('closeEditCategoryModalBtn');
+        const cancelEditCategoryBtn = document.getElementById('cancelEditCategoryBtn');
+        const editCategoryForm = document.getElementById('editCategoryForm');
+        const editCategoryId = document.getElementById('editCategoryId');
+        const editCategoryName = document.getElementById('editCategoryName');
         const exportBtn = document.getElementById('exportBtn');
         const importBtn = document.getElementById('importBtn');
         const exportModal = document.getElementById('exportModal');
@@ -879,23 +899,8 @@
         let currentCategoryId = null;
         let searchTerm = '';
         let categoryToDelete = null;
+        let categoryToEdit = null;
         let importData = null;
-
-        // Update element colors based on body background color
-        function updateElementColors() {
-            const bgColor = getComputedStyle(document.body).backgroundColor;
-            const isDarkBg = bgColor === 'rgb(17, 24, 39)'; // #111827
-            const currentCategory = document.getElementById('currentCategory');
-            const promptCategoryLabel = document.querySelector('label[for="promptCategory"]');
-
-            if (isDarkBg) {
-                currentCategory.style.color = 'white';
-                promptCategoryLabel.style.color = 'white';
-            } else {
-                currentCategory.style.color = '';
-                promptCategoryLabel.style.color = '';
-            }
-        }
 
         // Initialize the app
         function init() {
@@ -903,8 +908,7 @@
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
             updateThemeIcon(savedTheme);
-            updateElementColors();
-
+            
             renderCategories();
             renderPrompts();
             setupEventListeners();
@@ -1093,6 +1097,12 @@
                         <span class="category-count">${category.count}</span>
                     </div>
                     <div class="category-actions">
+                        <button class="category-action-btn edit-category-btn" title="Edit category">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                            </svg>
+                        </button>
                         <button class="category-action-btn delete-category-btn" title="Delete category">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <polyline points="3 6 5 6 21 6"></polyline>
@@ -1103,6 +1113,7 @@
                 `;
                 
                 const categoryInfo = item.querySelector('.category-info');
+                const editBtn = item.querySelector('.edit-category-btn');
                 const deleteBtn = item.querySelector('.delete-category-btn');
                 
                 categoryInfo.addEventListener('click', () => {
@@ -1110,6 +1121,11 @@
                     currentCategory.textContent = category.name;
                     renderCategories();
                     renderPrompts();
+                });
+                
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openEditCategoryModal(category);
                 });
                 
                 deleteBtn.addEventListener('click', (e) => {
@@ -1186,7 +1202,7 @@
                     <div class="prompt-description">${prompt.description}</div>
                     <div class="prompt-footer">
                         <span class="prompt-category">${category ? category.name : 'Uncategorized'}</span>
-                        <button class="copy-btn">
+                       <button class="copy-btn">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
                                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
@@ -1263,6 +1279,11 @@
             cancelDeleteCategoryBtn.addEventListener('click', closeDeleteCategoryModal);
             confirmDeleteCategoryBtn.addEventListener('click', confirmDeleteCategory);
             
+            // Edit category modal
+            closeEditCategoryModalBtn.addEventListener('click', closeEditCategoryModal);
+            cancelEditCategoryBtn.addEventListener('click', closeEditCategoryModal);
+            editCategoryForm.addEventListener('submit', handleEditCategorySubmit);
+            
             // Export/Import functionality
             exportBtn.addEventListener('click', openExportModal);
             importBtn.addEventListener('click', openImportModal);
@@ -1284,6 +1305,12 @@
             deleteCategoryModal.addEventListener('click', (e) => {
                 if (e.target === deleteCategoryModal) {
                     closeDeleteCategoryModal();
+                }
+            });
+            
+            editCategoryModal.addEventListener('click', (e) => {
+                if (e.target === editCategoryModal) {
+                    closeEditCategoryModal();
                 }
             });
             
@@ -1358,6 +1385,47 @@
                 renderPrompts();
                 closeDeleteCategoryModal();
                 showNotification('Category deleted successfully');
+            }
+        }
+
+        // Open edit category modal
+        function openEditCategoryModal(category) {
+            categoryToEdit = category;
+            editCategoryId.value = category.id;
+            editCategoryName.value = category.name;
+            editCategoryModal.style.display = 'flex';
+        }
+
+        // Close edit category modal
+        function closeEditCategoryModal() {
+            editCategoryModal.style.display = 'none';
+            categoryToEdit = null;
+        }
+
+        // Handle edit category form submission
+        function handleEditCategorySubmit(e) {
+            e.preventDefault();
+            
+            const newName = editCategoryName.value.trim();
+            if (newName && categoryToEdit) {
+                // Check if category name already exists
+                const existingCategory = categories.find(cat => 
+                    cat.id !== categoryToEdit.id && cat.name.toLowerCase() === newName.toLowerCase()
+                );
+                
+                if (existingCategory) {
+                    showNotification('Category name already exists!', 'error');
+                    return;
+                }
+                
+                // Update category name
+                categoryToEdit.name = newName;
+                
+                saveData();
+                renderCategories();
+                renderPrompts();
+                closeEditCategoryModal();
+                showNotification('Category updated successfully');
             }
         }
 
