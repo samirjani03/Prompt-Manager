@@ -575,6 +575,17 @@
             background: var(--secondary-color);
         }
 
+        /* Keyboard focus styles */
+        :focus {
+            outline: 3px solid rgba(67, 97, 238, 0.9);
+            outline-offset: 2px;
+            border-radius: 6px;
+        }
+
+        :focus:not(.focus-override) {
+            box-shadow: none;
+        }
+        
         @media (max-width: 768px) {
             .main-content {
                 flex-direction: column;
@@ -767,7 +778,7 @@
                 <p>Import prompts and categories from a JSON file. This will replace all current data.</p>
                 <div class="import-actions">
                     <div class="file-input-wrapper">
-                        <div class="file-input-btn">Choose JSON File</div>
+                        <label for="importFileInput" class="file-input-btn" tabindex="0">Choose JSON File</label>
                         <input type="file" id="importFileInput" accept=".json">
                     </div>
                     <div id="importFileName" style="margin-top: 0.5rem; font-style: italic;"></div>
@@ -1079,6 +1090,16 @@
                     <span class="category-count">${prompts.length}</span>
                 </div>
             `;
+            // keyboard accessibility
+            allItem.tabIndex = 0;
+            allItem.setAttribute('role', 'button');
+            allItem.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    allItem.querySelector('.category-info').click();
+                }
+            });
+
             allItem.addEventListener('click', () => {
                 currentCategoryId = null;
                 currentCategory.textContent = 'All Prompts';
@@ -1112,10 +1133,21 @@
                     </div>
                 `;
                 
+                // keyboard accessibility: make the whole item focusable and activate category on Enter/Space
+                item.tabIndex = 0;
+                item.setAttribute('role', 'button');
+
                 const categoryInfo = item.querySelector('.category-info');
                 const editBtn = item.querySelector('.edit-category-btn');
                 const deleteBtn = item.querySelector('.delete-category-btn');
                 
+                item.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        categoryInfo.click();
+                    }
+                });
+
                 categoryInfo.addEventListener('click', () => {
                     currentCategoryId = category.id;
                     currentCategory.textContent = category.name;
@@ -1218,6 +1250,16 @@
                 const copyBtn = promptBlock.querySelector('.copy-btn');
                 const description = promptBlock.querySelector('.prompt-description');
                 
+                // Make description keyboard-focusable and operable with Enter/Space
+                description.tabIndex = 0;
+                description.setAttribute('role', 'button');
+                description.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        promptBlock.classList.toggle('expanded');
+                    }
+                });
+
                 // Toggle expand/collapse on click
                 description.addEventListener('click', () => {
                     promptBlock.classList.toggle('expanded');
