@@ -614,7 +614,33 @@
     </style>
 </head>
 <body>
-    <header>
+    <script>
+        // Require prior login (basic protection)
+        if (!sessionStorage.getItem('authenticated')) {
+            window.location.href = 'index.html';
+        }
+
+        // Show browser "Leave site?" confirmation on reload/close
+        window.addEventListener('beforeunload', (e) => {
+            e.preventDefault();
+            e.returnValue = '';
+            return '';
+        });
+
+        // Detect reload (Navigation Timing Level 2 if available) and redirect to login
+        window.addEventListener('load', () => {
+            const navEntries = performance.getEntriesByType ? performance.getEntriesByType('navigation') : null;
+            const isReload = (navEntries && navEntries[0] && navEntries[0].type === 'reload')
+                             || (performance.navigation && performance.navigation.type === 1);
+
+            if (isReload) {
+                // Clear authentication and redirect to login page
+                sessionStorage.removeItem('authenticated');
+                window.location.href = 'index.html';
+            }
+        });
+        </script>
+        <header>
         <div class="container">
             <div class="header-content">
                 <div class="logo">Prompt Library</div>
