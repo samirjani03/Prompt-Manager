@@ -27,12 +27,22 @@
             --hover-color: #e9ecef;
         }
 
-        [data-theme="dark"] {
-            --bg-color: #121212;
+        /* [data-theme="dark"] {
+            --bg-color: #2b2727;
             --text-color: #e0e0e0;
             --card-bg: #1e1e1e;
             --header-bg: linear-gradient(135deg, #2d3748, #4a5568);
             --sidebar-bg: #1e1e1e;
+            --input-bg: #2d3748;
+            --border-color: #2d3748;
+            --hover-color: #2d3748;
+        } */
+        [data-theme="dark"] {
+            --bg-color: #111827;
+            --text-color: #e0e0e0;
+            --card-bg: #2D3748;
+            --header-bg: linear-gradient(135deg, #475d84, #0447bc);
+            --sidebar-bg: #2D3748;
             --input-bg: #2d3748;
             --border-color: #2d3748;
             --hover-color: #2d3748;
@@ -52,91 +62,6 @@
             transition: var(--transition);
         }
 
-        /* Password Protection Styles */
-        #passwordOverlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: var(--transition);
-        }
-
-        .password-container {
-            background: white;
-            padding: 3rem;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
-            text-align: center;
-            max-width: 450px;
-            width: 90%;
-            animation: fadeIn 0.8s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .password-container h1 {
-            color: #333;
-            margin-bottom: 1rem;
-            font-size: 2rem;
-        }
-
-        .password-container p {
-            color: #666;
-            margin-bottom: 2rem;
-            font-size: 1.1rem;
-        }
-
-        .password-input {
-            width: 100%;
-            padding: 1rem;
-            border: 2px solid #e0e0e0;
-            border-radius: var(--border-radius);
-            font-size: 1.1rem;
-            margin-bottom: 1.5rem;
-            transition: var(--transition);
-            text-align: center;
-        }
-
-        .password-input:focus {
-            border-color: var(--primary-color);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.3);
-        }
-
-        .password-btn {
-            background: var(--primary-color);
-            color: white;
-            border: none;
-            padding: 1rem 2rem;
-            border-radius: var(--border-radius);
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: var(--transition);
-            width: 100%;
-        }
-
-        .password-btn:hover {
-            background: var(--secondary-color);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
-        }
-
-        .error-message {
-            color: var(--danger-color);
-            margin-top: 1rem;
-            font-weight: 500;
-            display: none;
-        }
         .container {
             max-width: 1200px;
             margin: 0 auto;
@@ -448,7 +373,7 @@
         }
 
         .copy-btn {
-            background-color: var(--success-color);
+            background-color: rgba(1, 127, 244, 0.874);
             color: white;
             border: none;
             padding: 0.4rem 0.8rem;
@@ -456,6 +381,9 @@
             cursor: pointer;
             font-size: 0.8rem;
             transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
         }
 
         .copy-btn:hover {
@@ -684,262 +612,172 @@
     </style>
 </head>
 <body>
-    <!-- Password Protection Overlay -->
-    <div id="passwordOverlay">
-        <div class="password-container">
-            <h1>🔐 Secure Prompt Library</h1>
-            <p>Enter password to access the world's greatest prompt library</p>
-            <input type="password" id="passwordInput" class="password-input" placeholder="Enter password">
-            <button id="passwordSubmit" class="password-btn">Access Library</button>
-            <div id="passwordError" class="error-message">Incorrect password. Please try again.</div>
-           
-        </div>
-    </div>
-
-    <!-- Main Application (Hidden until password is verified) -->
-    <div id="mainApp" style="display: none;">
-        <header>
-            <div class="container">
-                <div class="header-content">
-                    <div class="logo">Prompt Library</div>
-                    <div class="search-bar">
-                        <input type="text" id="searchInput" placeholder="Search prompts...">
-                    </div>
-                    <div class="header-actions">
-                        <button class="export-btn" id="exportBtn" title="Export Data">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="7 10 12 15 17 10"></polyline>
-                                <line x1="12" y1="15" x2="12" y2="3"></line>
-                            </svg>
-                        </button>
-                        <button class="import-btn" id="importBtn" title="Import Data">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                                <polyline points="17 8 12 3 7 8"></polyline>
-                                <line x1="12" y1="3" x2="12" y2="15"></line>
-                            </svg>
-                        </button>
-                        <button class="theme-toggle" id="themeToggle" title="Toggle theme">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </header>
-
+    <header>
         <div class="container">
-            <div class="main-content">
-                <aside class="sidebar">
-                    <div class="categories">
-                        <h3>Categories</h3>
-                        <ul class="category-list" id="categoryList">
-                            <!-- Categories will be populated by JavaScript -->
-                        </ul>
-                    </div>
-                    <div class="add-category">
-                        <input type="text" id="newCategoryInput" placeholder="New category name">
-                        <button id="addCategoryBtn">Add Category</button>
-                    </div>
-                </aside>
-
-                <main class="content-area">
-                    <div class="content-header">
-                        <h2 id="currentCategory">All Prompts</h2>
-                        <button class="add-prompt-btn" id="addPromptBtn">
-                            <span>+</span> Add Prompt
-                        </button>
-                    </div>
-                    <div class="prompts-grid" id="promptsGrid">
-                        <!-- Prompt blocks will be populated by JavaScript -->
-                    </div>
-                </main>
-            </div>
-        </div>
-
-        <!-- Add/Edit Prompt Modal -->
-        <div class="modal" id="promptModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 id="modalTitle">Add New Prompt</h3>
-                    <button class="close-btn" id="closeModalBtn">&times;</button>
+            <div class="header-content">
+                <div class="logo">Prompt Library</div>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search prompts...">
                 </div>
-                <form id="promptForm">
-                    <input type="hidden" id="promptId">
-                    <div class="form-group">
-                        <label for="promptTitle">Title</label>
-                        <input type="text" id="promptTitle" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="promptDescription">Prompt</label>
-                        <textarea id="promptDescription" required></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="promptCategory">Category</label>
-                        <select id="promptCategory" required>
-                            <!-- Categories will be populated by JavaScript -->
-                        </select>
-                    </div>
-                    <div class="form-actions">
-                        <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
-                        <button type="submit" class="btn btn-primary">Save Prompt</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-
-        <!-- Delete Category Confirmation Modal -->
-        <div class="modal" id="deleteCategoryModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Delete Category</h3>
-                    <button class="close-btn" id="closeDeleteCategoryModalBtn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p id="deleteCategoryMessage">Are you sure you want to delete this category?</p>
-                    <p class="warning-text" style="color: var(--warning-color); margin-top: 1rem;">
-                        <strong>Warning:</strong> All prompts in this category will also be deleted.
-                    </p>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" id="cancelDeleteCategoryBtn">Cancel</button>
-                    <button type="button" class="btn btn-danger" id="confirmDeleteCategoryBtn">Delete Category</button>
+                <div class="header-actions">
+                    <button class="export-btn" id="exportBtn" title="Export Data">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                    <button class="import-btn" id="importBtn" title="Import Data">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </button>
+                    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
+    </header>
 
-        <!-- Export Data Modal -->
-        <div class="modal" id="exportModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Export Data</h3>
-                    <button class="close-btn" id="closeExportModalBtn">&times;</button>
+    <div class="container">
+        <div class="main-content">
+            <aside class="sidebar">
+                <div class="categories">
+                    <h3>Categories</h3>
+                    <ul class="category-list" id="categoryList">
+                        <!-- Categories will be populated by JavaScript -->
+                    </ul>
                 </div>
-                <div class="modal-body">
-                    <p>Export all your prompts and categories as a JSON file. This file can be used to backup your data or import it into another instance of this application.</p>
-                    <div class="json-preview" id="exportPreview">
-                        <!-- JSON preview will be populated by JavaScript -->
-                    </div>
+                <div class="add-category">
+                    <input type="text" id="newCategoryInput" placeholder="New category name">
+                    <button id="addCategoryBtn">Add Category</button>
                 </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" id="closeExportBtn">Close</button>
-                    <button type="button" class="btn btn-primary" id="downloadExportBtn">Download JSON File</button>
+            </aside>
+
+            <main class="content-area">
+                <div class="content-header">
+                    <h2 id="currentCategory">All Prompts</h2>
+                    <button class="add-prompt-btn" id="addPromptBtn">
+                        <span>+</span> Add Prompt
+                    </button>
                 </div>
-            </div>
+                <div class="prompts-grid" id="promptsGrid">
+                    <!-- Prompt blocks will be populated by JavaScript -->
+                </div>
+            </main>
         </div>
-
-        <!-- Import Data Modal -->
-        <div class="modal" id="importModal">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3>Import Data</h3>
-                    <button class="close-btn" id="closeImportModalBtn">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <p>Import prompts and categories from a JSON file. This will replace all current data.</p>
-                    <div class="import-actions">
-                        <div class="file-input-wrapper">
-                            <div class="file-input-btn">Choose JSON File</div>
-                            <input type="file" id="importFileInput" accept=".json">
-                        </div>
-                        <div id="importFileName" style="margin-top: 0.5rem; font-style: italic;"></div>
-                    </div>
-                    <div class="json-preview" id="importPreview" style="display: none;">
-                        <!-- JSON preview will be populated by JavaScript -->
-                    </div>
-                    <p class="warning-text" style="color: var(--warning-color); margin-top: 1rem;">
-                        <strong>Warning:</strong> Importing data will replace all your current prompts and categories.
-                    </p>
-                </div>
-                <div class="form-actions">
-                    <button type="button" class="btn btn-secondary" id="cancelImportBtn">Cancel</button>
-                    <button type="button" class="btn btn-primary" id="confirmImportBtn" disabled>Import Data</button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Notification -->
-        <div class="notification" id="notification">Prompt copied to clipboard!</div>
     </div>
+
+    <!-- Add/Edit Prompt Modal -->
+    <div class="modal" id="promptModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add New Prompt</h3>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <form id="promptForm">
+                <input type="hidden" id="promptId">
+                <div class="form-group">
+                    <label for="promptTitle">Title</label>
+                    <input type="text" id="promptTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="promptDescription">Prompt</label>
+                    <textarea id="promptDescription" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="promptCategory">Category</label>
+                    <select id="promptCategory" required>
+                        <!-- Categories will be populated by JavaScript -->
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Prompt</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Category Confirmation Modal -->
+    <div class="modal" id="deleteCategoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Delete Category</h3>
+                <button class="close-btn" id="closeDeleteCategoryModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteCategoryMessage">Are you sure you want to delete this category?</p>
+                <p class="warning-text" style="color: var(--warning-color); margin-top: 1rem;">
+                    <strong>Warning:</strong> All prompts in this category will also be deleted.
+                </p>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="cancelDeleteCategoryBtn">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteCategoryBtn">Delete Category</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Data Modal -->
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Data</h3>
+                <button class="close-btn" id="closeExportModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Export all your prompts and categories as a JSON file. This file can be used to backup your data or import it into another instance of this application.</p>
+                <div class="json-preview" id="exportPreview">
+                    <!-- JSON preview will be populated by JavaScript -->
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="closeExportBtn">Close</button>
+                <button type="button" class="btn btn-primary" id="downloadExportBtn">Download JSON File</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Data Modal -->
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Import Data</h3>
+                <button class="close-btn" id="closeImportModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Import prompts and categories from a JSON file. This will replace all current data.</p>
+                <div class="import-actions">
+                    <div class="file-input-wrapper">
+                        <div class="file-input-btn">Choose JSON File</div>
+                        <input type="file" id="importFileInput" accept=".json">
+                    </div>
+                    <div id="importFileName" style="margin-top: 0.5rem; font-style: italic;"></div>
+                </div>
+                <div class="json-preview" id="importPreview" style="display: none;">
+                    <!-- JSON preview will be populated by JavaScript -->
+                </div>
+                <p class="warning-text" style="color: var(--warning-color); margin-top: 1rem;">
+                    <strong>Warning:</strong> Importing data will replace all your current prompts and categories.
+                </p>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="cancelImportBtn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmImportBtn" disabled>Import Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">Prompt copied to clipboard!</div>
 
     <script>
-        // Password protection logic
-        const CORRECT_PASSWORD = "123@mkv";
-        const PASSWORD_KEY = "promptLibraryAuthenticated";
-        
-        // DOM Elements for password protection
-        const passwordOverlay = document.getElementById('passwordOverlay');
-        const passwordInput = document.getElementById('passwordInput');
-        const passwordSubmit = document.getElementById('passwordSubmit');
-        const passwordError = document.getElementById('passwordError');
-        const mainApp = document.getElementById('mainApp');
-        
-        // Check if user is already authenticated
-        function checkAuthentication() {
-            const isAuthenticated = localStorage.getItem(PASSWORD_KEY) === 'true';
-            if (isAuthenticated) {
-                // User is already authenticated, show the main app
-                passwordOverlay.style.display = 'none';
-                mainApp.style.display = 'block';
-                initApp();
-            } else {
-                // User needs to enter password
-                passwordOverlay.style.display = 'flex';
-                mainApp.style.display = 'none';
-            }
-        }
-        
-        // Handle password submission
-        function handlePasswordSubmit() {
-            const enteredPassword = passwordInput.value.trim();
-            
-            if (enteredPassword === CORRECT_PASSWORD) {
-                // Correct password - grant access
-                localStorage.setItem(PASSWORD_KEY, 'true');
-                passwordOverlay.style.opacity = '0';
-                setTimeout(() => {
-                    passwordOverlay.style.display = 'none';
-                    mainApp.style.display = 'block';
-                    initApp();
-                }, 500);
-            } else {
-                // Incorrect password - show error
-                passwordError.style.display = 'block';
-                passwordInput.value = '';
-                passwordInput.focus();
-                
-                // Shake animation for error
-                passwordOverlay.style.animation = 'shake 0.5s';
-                setTimeout(() => {
-                    passwordOverlay.style.animation = '';
-                }, 500);
-            }
-        }
-        
-        // Add shake animation for incorrect password
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-                20%, 40%, 60%, 80% { transform: translateX(5px); }
-            }
-        `;
-        document.head.appendChild(style);
-        
-        // Set up password event listeners
-        passwordSubmit.addEventListener('click', handlePasswordSubmit);
-        passwordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                handlePasswordSubmit();
-            }
-        });
-        
-        // Check authentication on page load
-        checkAuthentication();
-
         // Sample data structure
         let categories = JSON.parse(localStorage.getItem('promptCategories')) || [
             { id: 1, name: 'Study Prompts', count: 2 },
@@ -974,7 +812,7 @@
             }
         ];
 
-        // DOM Elements for main application
+        // DOM Elements
         const categoryList = document.getElementById('categoryList');
         const promptsGrid = document.getElementById('promptsGrid');
         const currentCategory = document.getElementById('currentCategory');
@@ -1019,13 +857,30 @@
         let categoryToDelete = null;
         let importData = null;
 
-        // Initialize the main application
-        function initApp() {
+        // Update element colors based on body background color
+        function updateElementColors() {
+            const bgColor = getComputedStyle(document.body).backgroundColor;
+            const isDarkBg = bgColor === 'rgb(17, 24, 39)'; // #111827
+            const currentCategory = document.getElementById('currentCategory');
+            const promptCategoryLabel = document.querySelector('label[for="promptCategory"]');
+
+            if (isDarkBg) {
+                currentCategory.style.color = 'white';
+                promptCategoryLabel.style.color = 'white';
+            } else {
+                currentCategory.style.color = '';
+                promptCategoryLabel.style.color = '';
+            }
+        }
+
+        // Initialize the app
+        function init() {
             // Load theme preference
             const savedTheme = localStorage.getItem('theme') || 'light';
             document.documentElement.setAttribute('data-theme', savedTheme);
             updateThemeIcon(savedTheme);
-            
+            updateElementColors();
+
             renderCategories();
             renderPrompts();
             setupEventListeners();
@@ -1307,7 +1162,13 @@
                     <div class="prompt-description">${prompt.description}</div>
                     <div class="prompt-footer">
                         <span class="prompt-category">${category ? category.name : 'Uncategorized'}</span>
-                        <button class="copy-btn">Copy Prompt</button>
+                        <button class="copy-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            Copy
+                        </button>
                     </div>
                 `;
                 
@@ -1587,6 +1448,9 @@
             localStorage.setItem('prompts', JSON.stringify(prompts));
             localStorage.setItem('promptCategories', JSON.stringify(categories));
         }
+
+        // Initialize the app
+        init();
     </script>
 </body>
 </html>
