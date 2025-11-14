@@ -613,15 +613,28 @@
 </head>
 <body>
     <script>
-        window.addEventListener("load", () => {
-    window.location.replace("/index.html");
-});
-
     // Check if user came from login page (basic protection)
     // In a real app, you'd use proper authentication
     if (!sessionStorage.getItem('authenticated')) {
         window.location.href = 'index.html';
     }
+
+    // Handle page reload confirmation
+    window.addEventListener('beforeunload', (e) => {
+        e.preventDefault();
+        e.returnValue = '';
+        return '';
+    });
+
+    // Listen for page reload and redirect to login
+    window.addEventListener('load', () => {
+        // Check if page is being reloaded
+        if (performance.navigation.type === 1) {
+            // Clear authentication and redirect to login
+            sessionStorage.removeItem('authenticated');
+            window.location.href = 'index.html';
+        }
+    });
 </script>
     <header>
         <div class="container">
