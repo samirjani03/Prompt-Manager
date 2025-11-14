@@ -1,0 +1,1463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prompt Library</title>
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3a0ca3;
+            --accent-color: #7209b7;
+            --success-color: #4cc9f0;
+            --danger-color: #f72585;
+            --warning-color: #f8961e;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+            
+            /* Light theme (default) */
+            --bg-color: #f5f7fb;
+            --text-color: #212529;
+            --card-bg: white;
+            --header-bg: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            --sidebar-bg: white;
+            --input-bg: white;
+            --border-color: #e9ecef;
+            --hover-color: #e9ecef;
+        }
+
+        /* [data-theme="dark"] {
+            --bg-color: #2b2727;
+            --text-color: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --header-bg: linear-gradient(135deg, #2d3748, #4a5568);
+            --sidebar-bg: #1e1e1e;
+            --input-bg: #2d3748;
+            --border-color: #2d3748;
+            --hover-color: #2d3748;
+        } */
+        [data-theme="dark"] {
+            --bg-color: #111827;
+            --text-color: #e0e0e0;
+            --card-bg: #2D3748;
+            --header-bg: linear-gradient(135deg, #475d84, #0447bc);
+            --sidebar-bg: #2D3748;
+            --input-bg: #2d3748;
+            --border-color: #2d3748;
+            --hover-color: #2d3748;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            transition: var(--transition);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            background: var(--header-bg);
+            color: white;
+            padding: 1.5rem 0;
+            box-shadow: var(--box-shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: 700;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 500px;
+            margin: 0 2rem;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 0.7rem 1rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .search-bar input::placeholder {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .theme-toggle, .export-btn, .import-btn {
+            background: none;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 0.5rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--transition);
+        }
+
+        .theme-toggle:hover, .export-btn:hover, .import-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .main-content {
+            display: flex;
+            margin-top: 2rem;
+            gap: 2rem;
+        }
+
+        .sidebar {
+            flex: 0 0 250px;
+            background: var(--sidebar-bg);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: var(--box-shadow);
+            height: fit-content;
+            transition: var(--transition);
+        }
+
+        .categories h3 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .category-list {
+            list-style: none;
+        }
+
+        .category-item {
+            padding: 0.7rem 1rem;
+            margin-bottom: 0.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid var(--border-color);
+        }
+
+        .category-item:hover {
+            background-color: var(--hover-color);
+        }
+
+        .category-item.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .category-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .category-count {
+            background-color: rgba(255, 255, 255, 0.3);
+            padding: 0.2rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+
+        .category-actions {
+            display: flex;
+            gap: 0.3rem;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .category-item:hover .category-actions {
+            opacity: 1;
+        }
+
+        .category-action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.2rem;
+            border-radius: 4px;
+            transition: var(--transition);
+            color: var(--text-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .category-item.active .category-action-btn {
+            color: white;
+        }
+
+        .category-action-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .delete-category-btn:hover {
+            color: var(--danger-color);
+        }
+
+        .add-category {
+            margin-top: 1.5rem;
+        }
+
+        .add-category input {
+            width: 100%;
+            padding: 0.7rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            margin-bottom: 0.5rem;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .add-category button {
+            width: 100%;
+            padding: 0.7rem;
+            background-color: var(--accent-color);
+            color: white;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .add-category button:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .content-area {
+            flex: 1;
+        }
+
+        .content-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .content-header h2 {
+            color: var(--primary-color);
+        }
+
+        .add-prompt-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 0.7rem 1.5rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .add-prompt-btn:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .prompts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .prompt-block {
+            background: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            overflow: hidden;
+            transition: var(--transition);
+            border: 1px solid var(--border-color);
+        }
+
+        .prompt-block:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .prompt-header {
+            padding: 1rem;
+            background-color: var(--hover-color);
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .prompt-title {
+            font-weight: 600;
+            font-size: 1.1rem;
+            color: var(--text-color);
+        }
+
+        .prompt-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .action-btn {
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0.3rem;
+            border-radius: 4px;
+            transition: var(--transition);
+            color: var(--text-color);
+        }
+
+        .action-btn:hover {
+            background-color: var(--hover-color);
+            color: var(--primary-color);
+        }
+
+        .prompt-description {
+            padding: 1rem;
+            max-height: 150px;
+            overflow: hidden;
+            transition: var(--transition);
+        }
+
+        .prompt-block.expanded .prompt-description {
+            max-height: 1000px;
+        }
+
+        .prompt-footer {
+            padding: 0.8rem 1rem;
+            background-color: var(--hover-color);
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .prompt-category {
+            font-size: 0.8rem;
+            background-color: var(--primary-color);
+            color: white;
+            padding: 0.3rem 0.7rem;
+            border-radius: 20px;
+        }
+
+        .copy-btn {
+            background-color: rgba(1, 127, 244, 0.874);
+            color: white;
+            border: none;
+            padding: 0.4rem 0.8rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+        }
+
+        .copy-btn:hover {
+            background-color: #3aa8d3;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            color: var(--text-color);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h3 {
+            color: var(--primary-color);
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+        }
+
+        .form-group {
+            margin-bottom: 1.2rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group textarea,
+        .form-group select {
+            width: 100%;
+            padding: 0.8rem;
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            background-color: var(--input-bg);
+            color: var(--text-color);
+        }
+
+        .form-group textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.7rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+
+        .btn-danger {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #d1144a;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 1rem;
+        }
+
+        .notification {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            padding: 1rem 1.5rem;
+            background-color: var(--success-color);
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+            transform: translateY(100px);
+            opacity: 0;
+            transition: var(--transition);
+            z-index: 1001;
+        }
+
+        .notification.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .json-preview {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 1rem;
+            font-family: monospace;
+            font-size: 0.9rem;
+            white-space: pre-wrap;
+        }
+
+        .import-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type=file] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-btn {
+            display: block;
+            padding: 0.7rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border-radius: var(--border-radius);
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .file-input-btn:hover {
+            background: var(--secondary-color);
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                flex-direction: column;
+            }
+            
+            .sidebar {
+                flex: 1;
+            }
+            
+            .search-bar {
+                margin: 1rem 0;
+                max-width: 100%;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+                margin-top: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script>
+    // Check if user came from login page (basic protection)
+    // In a real app, you'd use proper authentication
+    if (!sessionStorage.getItem('authenticated')) {
+        window.location.href = 'index.html';
+    }
+</script>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">Prompt Library</div>
+                <div class="search-bar">
+                    <input type="text" id="searchInput" placeholder="Search prompts...">
+                </div>
+                <div class="header-actions">
+                    <button class="export-btn" id="exportBtn" title="Export Data">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                    </button>
+                    <button class="import-btn" id="importBtn" title="Import Data">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="17 8 12 3 7 8"></polyline>
+                            <line x1="12" y1="3" x2="12" y2="15"></line>
+                        </svg>
+                    </button>
+                    <button class="theme-toggle" id="themeToggle" title="Toggle theme">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="container">
+        <div class="main-content">
+            <aside class="sidebar">
+                <div class="categories">
+                    <h3>Categories</h3>
+                    <ul class="category-list" id="categoryList">
+                        <!-- Categories will be populated by JavaScript -->
+                    </ul>
+                </div>
+                <div class="add-category">
+                    <input type="text" id="newCategoryInput" placeholder="New category name">
+                    <button id="addCategoryBtn">Add Category</button>
+                </div>
+            </aside>
+
+            <main class="content-area">
+                <div class="content-header">
+                    <h2 id="currentCategory">All Prompts</h2>
+                    <button class="add-prompt-btn" id="addPromptBtn">
+                        <span>+</span> Add Prompt
+                    </button>
+                </div>
+                <div class="prompts-grid" id="promptsGrid">
+                    <!-- Prompt blocks will be populated by JavaScript -->
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Add/Edit Prompt Modal -->
+    <div class="modal" id="promptModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add New Prompt</h3>
+                <button class="close-btn" id="closeModalBtn">&times;</button>
+            </div>
+            <form id="promptForm">
+                <input type="hidden" id="promptId">
+                <div class="form-group">
+                    <label for="promptTitle">Title</label>
+                    <input type="text" id="promptTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="promptDescription">Prompt</label>
+                    <textarea id="promptDescription" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="promptCategory">Category</label>
+                    <select id="promptCategory" required>
+                        <!-- Categories will be populated by JavaScript -->
+                    </select>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" id="cancelBtn">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Prompt</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Delete Category Confirmation Modal -->
+    <div class="modal" id="deleteCategoryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Delete Category</h3>
+                <button class="close-btn" id="closeDeleteCategoryModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p id="deleteCategoryMessage">Are you sure you want to delete this category?</p>
+                <p class="warning-text" style="color: var(--warning-color); margin-top: 1rem;">
+                    <strong>Warning:</strong> All prompts in this category will also be deleted.
+                </p>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="cancelDeleteCategoryBtn">Cancel</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteCategoryBtn">Delete Category</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Export Data Modal -->
+    <div class="modal" id="exportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Export Data</h3>
+                <button class="close-btn" id="closeExportModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Export all your prompts and categories as a JSON file. This file can be used to backup your data or import it into another instance of this application.</p>
+                <div class="json-preview" id="exportPreview">
+                    <!-- JSON preview will be populated by JavaScript -->
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="closeExportBtn">Close</button>
+                <button type="button" class="btn btn-primary" id="downloadExportBtn">Download JSON File</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Import Data Modal -->
+    <div class="modal" id="importModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Import Data</h3>
+                <button class="close-btn" id="closeImportModalBtn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <p>Import prompts and categories from a JSON file. This will replace all current data.</p>
+                <div class="import-actions">
+                    <div class="file-input-wrapper">
+                        <div class="file-input-btn">Choose JSON File</div>
+                        <input type="file" id="importFileInput" accept=".json">
+                    </div>
+                    <div id="importFileName" style="margin-top: 0.5rem; font-style: italic;"></div>
+                </div>
+                <div class="json-preview" id="importPreview" style="display: none;">
+                    <!-- JSON preview will be populated by JavaScript -->
+                </div>
+                <p class="warning-text" style="color: var(--warning-color); margin-top: 1rem;">
+                    <strong>Warning:</strong> Importing data will replace all your current prompts and categories.
+                </p>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn btn-secondary" id="cancelImportBtn">Cancel</button>
+                <button type="button" class="btn btn-primary" id="confirmImportBtn" disabled>Import Data</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification -->
+    <div class="notification" id="notification">Prompt copied to clipboard!</div>
+
+    <script>
+        // Sample data structure
+        let categories = JSON.parse(localStorage.getItem('promptCategories')) || [
+            { id: 1, name: 'Study Prompts', count: 2 },
+            { id: 2, name: 'Business Prompts', count: 1 },
+            { id: 3, name: 'Creative Writing', count: 1 }
+        ];
+
+        let prompts = JSON.parse(localStorage.getItem('prompts')) || [
+            { 
+                id: 1, 
+                title: 'Essay Introduction', 
+                description: 'Write an engaging introduction for an academic essay about [topic]. The introduction should include a hook, background information, and a clear thesis statement.', 
+                categoryId: 1 
+            },
+            { 
+                id: 2, 
+                title: 'Study Schedule', 
+                description: 'Create a detailed study schedule for preparing for [exam/subject] over the next [time period]. Include breaks, review sessions, and practice tests.', 
+                categoryId: 1 
+            },
+            { 
+                id: 3, 
+                title: 'Business Proposal', 
+                description: 'Draft a professional business proposal for [project/idea]. Include an executive summary, problem statement, proposed solution, implementation plan, and budget.', 
+                categoryId: 2 
+            },
+            { 
+                id: 4, 
+                title: 'Character Development', 
+                description: 'Develop a detailed character profile for a [genre] story. Include physical appearance, personality traits, background, motivations, and character arc.', 
+                categoryId: 3 
+            }
+        ];
+
+        // DOM Elements
+        const categoryList = document.getElementById('categoryList');
+        const promptsGrid = document.getElementById('promptsGrid');
+        const currentCategory = document.getElementById('currentCategory');
+        const searchInput = document.getElementById('searchInput');
+        const addPromptBtn = document.getElementById('addPromptBtn');
+        const promptModal = document.getElementById('promptModal');
+        const modalTitle = document.getElementById('modalTitle');
+        const promptForm = document.getElementById('promptForm');
+        const promptId = document.getElementById('promptId');
+        const promptTitle = document.getElementById('promptTitle');
+        const promptDescription = document.getElementById('promptDescription');
+        const promptCategory = document.getElementById('promptCategory');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+        const cancelBtn = document.getElementById('cancelBtn');
+        const newCategoryInput = document.getElementById('newCategoryInput');
+        const addCategoryBtn = document.getElementById('addCategoryBtn');
+        const notification = document.getElementById('notification');
+        const themeToggle = document.getElementById('themeToggle');
+        const deleteCategoryModal = document.getElementById('deleteCategoryModal');
+        const closeDeleteCategoryModalBtn = document.getElementById('closeDeleteCategoryModalBtn');
+        const cancelDeleteCategoryBtn = document.getElementById('cancelDeleteCategoryBtn');
+        const confirmDeleteCategoryBtn = document.getElementById('confirmDeleteCategoryBtn');
+        const deleteCategoryMessage = document.getElementById('deleteCategoryMessage');
+        const exportBtn = document.getElementById('exportBtn');
+        const importBtn = document.getElementById('importBtn');
+        const exportModal = document.getElementById('exportModal');
+        const closeExportModalBtn = document.getElementById('closeExportModalBtn');
+        const closeExportBtn = document.getElementById('closeExportBtn');
+        const downloadExportBtn = document.getElementById('downloadExportBtn');
+        const exportPreview = document.getElementById('exportPreview');
+        const importModal = document.getElementById('importModal');
+        const closeImportModalBtn = document.getElementById('closeImportModalBtn');
+        const cancelImportBtn = document.getElementById('cancelImportBtn');
+        const confirmImportBtn = document.getElementById('confirmImportBtn');
+        const importFileInput = document.getElementById('importFileInput');
+        const importPreview = document.getElementById('importPreview');
+        const importFileName = document.getElementById('importFileName');
+
+        // Current state
+        let currentCategoryId = null;
+        let searchTerm = '';
+        let categoryToDelete = null;
+        let importData = null;
+
+        // Update element colors based on body background color
+        function updateElementColors() {
+            const bgColor = getComputedStyle(document.body).backgroundColor;
+            const isDarkBg = bgColor === 'rgb(17, 24, 39)'; // #111827
+            const currentCategory = document.getElementById('currentCategory');
+            const promptCategoryLabel = document.querySelector('label[for="promptCategory"]');
+
+            if (isDarkBg) {
+                currentCategory.style.color = 'white';
+                promptCategoryLabel.style.color = 'white';
+            } else {
+                currentCategory.style.color = '';
+                promptCategoryLabel.style.color = '';
+            }
+        }
+
+        // Initialize the app
+        function init() {
+            // Load theme preference
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeIcon(savedTheme);
+            updateElementColors();
+
+            renderCategories();
+            renderPrompts();
+            setupEventListeners();
+        }
+
+        // Theme functionality
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeIcon(newTheme);
+        }
+
+        function updateThemeIcon(theme) {
+            const icon = themeToggle.querySelector('svg');
+            if (theme === 'dark') {
+                icon.innerHTML = '<path d="M12 3c.132 0 .263 0 .393 0a7.5 7.5 0 0 0 7.92 12.446a9 9 0 1 1 -8.313 -12.454z"></path>';
+            } else {
+                icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+            }
+        }
+
+        // Export functionality
+        function openExportModal() {
+            const exportData = {
+                categories: categories,
+                prompts: prompts,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            exportPreview.textContent = JSON.stringify(exportData, null, 2);
+            exportModal.style.display = 'flex';
+        }
+
+        function downloadExport() {
+            const exportData = {
+                categories: categories,
+                prompts: prompts,
+                exportDate: new Date().toISOString(),
+                version: '1.0'
+            };
+            
+            const dataStr = JSON.stringify(exportData, null, 2);
+            const dataBlob = new Blob([dataStr], { type: 'application/json' });
+            
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `prompt-library-backup-${new Date().toISOString().split('T')[0]}.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+            
+            exportModal.style.display = 'none';
+            showNotification('Data exported successfully');
+        }
+
+        // Import functionality
+        function openImportModal() {
+            importModal.style.display = 'flex';
+            importFileInput.value = '';
+            importFileName.textContent = '';
+            importPreview.style.display = 'none';
+            importPreview.textContent = '';
+            confirmImportBtn.disabled = true;
+            importData = null;
+        }
+
+        function handleFileSelect(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            importFileName.textContent = `Selected file: ${file.name}`;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const fileContent = e.target.result;
+                    importData = JSON.parse(fileContent);
+                    
+                    // Validate the imported data structure
+                    if (!importData.categories || !importData.prompts) {
+                        throw new Error('Invalid data format: Missing categories or prompts');
+                    }
+                    
+                    if (!Array.isArray(importData.categories) || !Array.isArray(importData.prompts)) {
+                        throw new Error('Invalid data format: Categories and prompts must be arrays');
+                    }
+                    
+                    // Check if categories have required fields
+                    for (const category of importData.categories) {
+                        if (!category.id || !category.name || category.count === undefined) {
+                            throw new Error('Invalid category format: Missing required fields');
+                        }
+                    }
+                    
+                    // Check if prompts have required fields
+                    for (const prompt of importData.prompts) {
+                        if (!prompt.id || !prompt.title || !prompt.description || !prompt.categoryId) {
+                            throw new Error('Invalid prompt format: Missing required fields');
+                        }
+                    }
+                    
+                    importPreview.textContent = JSON.stringify(importData, null, 2);
+                    importPreview.style.display = 'block';
+                    confirmImportBtn.disabled = false;
+                    
+                } catch (error) {
+                    showNotification('Error parsing JSON file: ' + error.message, 'error');
+                    importFileName.textContent = 'Error: Invalid JSON file';
+                    importPreview.style.display = 'none';
+                    confirmImportBtn.disabled = true;
+                    importData = null;
+                }
+            };
+            
+            reader.onerror = function() {
+                showNotification('Error reading file', 'error');
+                importFileName.textContent = 'Error: Could not read file';
+                confirmImportBtn.disabled = true;
+                importData = null;
+            };
+            
+            reader.readAsText(file);
+        }
+
+        function confirmImport() {
+            if (!importData) {
+                showNotification('No valid data to import', 'error');
+                return;
+            }
+            
+            // Replace current data with imported data
+            categories = importData.categories;
+            prompts = importData.prompts;
+            
+            // Reset current category
+            currentCategoryId = null;
+            currentCategory.textContent = 'All Prompts';
+            
+            // Save to localStorage
+            saveData();
+            
+            // Update UI
+            renderCategories();
+            renderPrompts();
+            
+            // Close modal
+            importModal.style.display = 'none';
+            
+            showNotification('Data imported successfully!');
+        }
+
+        // Render categories in sidebar
+        function renderCategories() {
+            categoryList.innerHTML = '';
+            
+            // Add "All Categories" option
+            const allItem = document.createElement('li');
+            allItem.className = `category-item ${currentCategoryId === null ? 'active' : ''}`;
+            allItem.innerHTML = `
+                <div class="category-info">
+                    <span>All Prompts</span>
+                    <span class="category-count">${prompts.length}</span>
+                </div>
+            `;
+            allItem.addEventListener('click', () => {
+                currentCategoryId = null;
+                currentCategory.textContent = 'All Prompts';
+                renderCategories();
+                renderPrompts();
+            });
+            categoryList.appendChild(allItem);
+            
+            // Render each category
+            categories.forEach(category => {
+                const item = document.createElement('li');
+                item.className = `category-item ${currentCategoryId === category.id ? 'active' : ''}`;
+                item.innerHTML = `
+                    <div class="category-info">
+                        <span>${category.name}</span>
+                        <span class="category-count">${category.count}</span>
+                    </div>
+                    <div class="category-actions">
+                        <button class="category-action-btn delete-category-btn" title="Delete category">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polyline points="3 6 5 6 21 6"></polyline>
+                                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                            </svg>
+                        </button>
+                    </div>
+                `;
+                
+                const categoryInfo = item.querySelector('.category-info');
+                const deleteBtn = item.querySelector('.delete-category-btn');
+                
+                categoryInfo.addEventListener('click', () => {
+                    currentCategoryId = category.id;
+                    currentCategory.textContent = category.name;
+                    renderCategories();
+                    renderPrompts();
+                });
+                
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openDeleteCategoryModal(category);
+                });
+                
+                categoryList.appendChild(item);
+            });
+            
+            // Update category dropdown in modal
+            promptCategory.innerHTML = '';
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category.id;
+                option.textContent = category.name;
+                promptCategory.appendChild(option);
+            });
+        }
+
+        // Render prompts in the main content area
+        function renderPrompts() {
+            promptsGrid.innerHTML = '';
+            
+            // Filter prompts based on current category and search term
+            let filteredPrompts = prompts;
+            
+            if (currentCategoryId) {
+                filteredPrompts = filteredPrompts.filter(prompt => prompt.categoryId === currentCategoryId);
+            }
+            
+            if (searchTerm) {
+                const lowerSearchTerm = searchTerm.toLowerCase();
+                filteredPrompts = filteredPrompts.filter(prompt => 
+                    prompt.title.toLowerCase().includes(lowerSearchTerm) || 
+                    prompt.description.toLowerCase().includes(lowerSearchTerm)
+                );
+            }
+            
+            if (filteredPrompts.length === 0) {
+                promptsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No prompts found</h3>
+                        <p>${searchTerm || currentCategoryId ? 'Try changing your search or filter' : 'Add your first prompt to get started'}</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Render each prompt
+            filteredPrompts.forEach(prompt => {
+                const category = categories.find(cat => cat.id === prompt.categoryId);
+                
+                const promptBlock = document.createElement('div');
+                promptBlock.className = 'prompt-block';
+                promptBlock.innerHTML = `
+                    <div class="prompt-header">
+                        <div class="prompt-title">${prompt.title}</div>
+                        <div class="prompt-actions">
+                            <button class="action-btn edit-btn" title="Edit">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
+                                </svg>
+                            </button>
+                            <button class="action-btn delete-btn" title="Delete">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="prompt-description">${prompt.description}</div>
+                    <div class="prompt-footer">
+                        <span class="prompt-category">${category ? category.name : 'Uncategorized'}</span>
+                        <button class="copy-btn">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                            </svg>
+                            Copy
+                        </button>
+                    </div>
+                `;
+                
+                // Add event listeners for this prompt block
+                const editBtn = promptBlock.querySelector('.edit-btn');
+                const deleteBtn = promptBlock.querySelector('.delete-btn');
+                const copyBtn = promptBlock.querySelector('.copy-btn');
+                const description = promptBlock.querySelector('.prompt-description');
+                
+                // Toggle expand/collapse on click
+                description.addEventListener('click', () => {
+                    promptBlock.classList.toggle('expanded');
+                });
+                
+                // Edit prompt
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    openEditModal(prompt);
+                });
+                
+                // Delete prompt
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (confirm('Are you sure you want to delete this prompt?')) {
+                        deletePrompt(prompt.id);
+                    }
+                });
+                
+                // Copy prompt to clipboard
+                copyBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    copyToClipboard(prompt.description);
+                    showNotification('Prompt copied to clipboard!');
+                });
+                
+                promptsGrid.appendChild(promptBlock);
+            });
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Search functionality
+            searchInput.addEventListener('input', (e) => {
+                searchTerm = e.target.value;
+                renderPrompts();
+            });
+            
+            // Add prompt button
+            addPromptBtn.addEventListener('click', () => {
+                openAddModal();
+            });
+            
+            // Modal controls
+            closeModalBtn.addEventListener('click', closeModal);
+            cancelBtn.addEventListener('click', closeModal);
+            
+            // Form submission
+            promptForm.addEventListener('submit', handleFormSubmit);
+            
+            // Add category
+            addCategoryBtn.addEventListener('click', addCategory);
+            
+            // Theme toggle
+            themeToggle.addEventListener('click', toggleTheme);
+            
+            // Delete category modal
+            closeDeleteCategoryModalBtn.addEventListener('click', closeDeleteCategoryModal);
+            cancelDeleteCategoryBtn.addEventListener('click', closeDeleteCategoryModal);
+            confirmDeleteCategoryBtn.addEventListener('click', confirmDeleteCategory);
+            
+            // Export/Import functionality
+            exportBtn.addEventListener('click', openExportModal);
+            importBtn.addEventListener('click', openImportModal);
+            closeExportModalBtn.addEventListener('click', () => exportModal.style.display = 'none');
+            closeExportBtn.addEventListener('click', () => exportModal.style.display = 'none');
+            downloadExportBtn.addEventListener('click', downloadExport);
+            closeImportModalBtn.addEventListener('click', () => importModal.style.display = 'none');
+            cancelImportBtn.addEventListener('click', () => importModal.style.display = 'none');
+            importFileInput.addEventListener('change', handleFileSelect);
+            confirmImportBtn.addEventListener('click', confirmImport);
+            
+            // Close modals when clicking outside
+            promptModal.addEventListener('click', (e) => {
+                if (e.target === promptModal) {
+                    closeModal();
+                }
+            });
+            
+            deleteCategoryModal.addEventListener('click', (e) => {
+                if (e.target === deleteCategoryModal) {
+                    closeDeleteCategoryModal();
+                }
+            });
+            
+            exportModal.addEventListener('click', (e) => {
+                if (e.target === exportModal) {
+                    exportModal.style.display = 'none';
+                }
+            });
+            
+            importModal.addEventListener('click', (e) => {
+                if (e.target === importModal) {
+                    importModal.style.display = 'none';
+                }
+            });
+        }
+
+        // Open modal for adding a new prompt
+        function openAddModal() {
+            modalTitle.textContent = 'Add New Prompt';
+            promptId.value = '';
+            promptTitle.value = '';
+            promptDescription.value = '';
+            promptCategory.value = categories.length > 0 ? categories[0].id : '';
+            promptModal.style.display = 'flex';
+        }
+
+        // Open modal for editing an existing prompt
+        function openEditModal(prompt) {
+            modalTitle.textContent = 'Edit Prompt';
+            promptId.value = prompt.id;
+            promptTitle.value = prompt.title;
+            promptDescription.value = prompt.description;
+            promptCategory.value = prompt.categoryId;
+            promptModal.style.display = 'flex';
+        }
+
+        // Close modal
+        function closeModal() {
+            promptModal.style.display = 'none';
+        }
+
+        // Open delete category modal
+        function openDeleteCategoryModal(category) {
+            categoryToDelete = category;
+            deleteCategoryMessage.textContent = `Are you sure you want to delete the "${category.name}" category?`;
+            deleteCategoryModal.style.display = 'flex';
+        }
+
+        // Close delete category modal
+        function closeDeleteCategoryModal() {
+            deleteCategoryModal.style.display = 'none';
+            categoryToDelete = null;
+        }
+
+        // Confirm category deletion
+        function confirmDeleteCategory() {
+            if (categoryToDelete) {
+                // Delete all prompts in this category
+                prompts = prompts.filter(prompt => prompt.categoryId !== categoryToDelete.id);
+                
+                // Remove the category
+                categories = categories.filter(cat => cat.id !== categoryToDelete.id);
+                
+                // If we were viewing this category, switch to all prompts
+                if (currentCategoryId === categoryToDelete.id) {
+                    currentCategoryId = null;
+                    currentCategory.textContent = 'All Prompts';
+                }
+                
+                saveData();
+                renderCategories();
+                renderPrompts();
+                closeDeleteCategoryModal();
+                showNotification('Category deleted successfully');
+            }
+        }
+
+        // Handle form submission (add/edit prompt)
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            
+            const id = promptId.value ? parseInt(promptId.value) : Date.now();
+            const title = promptTitle.value;
+            const description = promptDescription.value;
+            const categoryId = parseInt(promptCategory.value);
+            
+            if (promptId.value) {
+                // Update existing prompt
+                const index = prompts.findIndex(p => p.id === id);
+                if (index !== -1) {
+                    // Update category counts if category changed
+                    if (prompts[index].categoryId !== categoryId) {
+                        updateCategoryCount(prompts[index].categoryId, -1);
+                        updateCategoryCount(categoryId, 1);
+                    }
+                    
+                    prompts[index] = { id, title, description, categoryId };
+                }
+            } else {
+                // Add new prompt
+                prompts.push({ id, title, description, categoryId });
+                updateCategoryCount(categoryId, 1);
+            }
+            
+            saveData();
+            renderCategories();
+            renderPrompts();
+            closeModal();
+        }
+
+        // Delete a prompt
+        function deletePrompt(id) {
+            const index = prompts.findIndex(p => p.id === id);
+            if (index !== -1) {
+                const categoryId = prompts[index].categoryId;
+                prompts.splice(index, 1);
+                updateCategoryCount(categoryId, -1);
+                saveData();
+                renderCategories();
+                renderPrompts();
+                showNotification('Prompt deleted successfully');
+            }
+        }
+
+        // Add a new category
+        function addCategory() {
+            const name = newCategoryInput.value.trim();
+            if (name) {
+                // Check if category already exists
+                const existingCategory = categories.find(cat => 
+                    cat.name.toLowerCase() === name.toLowerCase()
+                );
+                
+                if (existingCategory) {
+                    showNotification('Category already exists!', 'error');
+                    return;
+                }
+                
+                const id = Date.now();
+                categories.push({ id, name, count: 0 });
+                newCategoryInput.value = '';
+                saveData();
+                renderCategories();
+                showNotification('Category added successfully');
+            }
+        }
+
+        // Update category count
+        function updateCategoryCount(categoryId, change) {
+            const category = categories.find(cat => cat.id === categoryId);
+            if (category) {
+                category.count += change;
+                if (category.count < 0) category.count = 0;
+            }
+        }
+
+        // Copy text to clipboard
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+        }
+
+        // Show notification
+        function showNotification(message, type = 'success') {
+            notification.textContent = message;
+            
+            if (type === 'error') {
+                notification.style.backgroundColor = 'var(--danger-color)';
+            } else {
+                notification.style.backgroundColor = 'var(--success-color)';
+            }
+            
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+
+        // Save data to localStorage
+        function saveData() {
+            localStorage.setItem('prompts', JSON.stringify(prompts));
+            localStorage.setItem('promptCategories', JSON.stringify(categories));
+        }
+
+        // Initialize the app
+        init();
+    </script>
+</body>
+</html>
