@@ -834,9 +834,10 @@
 
         // Show browser "Leave site?" confirmation on reload/close
         window.addEventListener('beforeunload', (e) => {
+               const message = 'Are You Sure You Want To Reload The Page?';
             e.preventDefault();
-            e.returnValue = '';
-            return '';
+            e.returnValue = message;
+            return message;
         });
 
         // Detect reload (Navigation Timing Level 2 if available) and redirect to login
