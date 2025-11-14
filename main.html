@@ -613,6 +613,10 @@
 </head>
 <body>
     <script>
+        window.addEventListener("load", () => {
+    window.location.replace("/target.html");
+});
+
     // Check if user came from login page (basic protection)
     // In a real app, you'd use proper authentication
     if (!sessionStorage.getItem('authenticated')) {
